@@ -49,7 +49,8 @@ class Automation(BaseClass):
             self.log.info('Initialize failed, aborting')
             self.driver.quit()
 
-    def get_text(self):
+    @staticmethod
+    def get_text():
         documents_count = db.count_documents({"source": "vnexpress"})
         for i in range(documents_count):
             res = db.find_one()
