@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from base import BaseClass
 from common.check_file_empty import is_file_empty
 from common.database_connect import connect_to_database
+from common.schema.validator import NewsValidator
 import time
 import random
 
@@ -75,6 +76,7 @@ class RssExtractor(BaseClass):
 class NewsExtractor(BaseClass):
     def __init__(self):
         super().__init__()
+        self.validator = NewsValidator()
         if is_file_empty('crawler/data/vnexpressrss_news_link.txt'):
             RssExtractor().load()
         self.log.info('Getting news links')
@@ -109,6 +111,9 @@ class NewsExtractor(BaseClass):
             try:
                 self.log.info(f"extracting: {link}")
                 news = self.extract_news(link)
+                if not self.validator.validate(news):
+                    self.log.info(f"{link} failed to validate")
+                    continue
                 self.log.info(f"Finished extracting {link}, pushing to database")
                 db.insert_one(news)
                 self.log.info("Pushed to database")
