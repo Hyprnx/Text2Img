@@ -5,7 +5,7 @@ from pymongo.database import Database
 from configparser import ConfigParser
 
 
-def connect_to_database(path='config.ini', profile='local'):
+def connect_to_database(path='common/config.ini', profile='local'):
     try:
         config = ConfigParser()
         config.read_file(open(path))

@@ -2,6 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from base import BaseClass
 from common.check_file_empty import is_file_empty
+from common.database_connect import connect_to_database
+import time
+import random
+
+db = connect_to_database()
+db = db['news']
 
 
 class VNExpressRSS(BaseClass):
@@ -30,7 +36,7 @@ class VNExpressRSS(BaseClass):
 class RssExtractor(BaseClass):
     def __init__(self):
         super().__init__()
-        if is_file_empty('data/vnexpressrss_rss_link.txt'):
+        if is_file_empty('crawler/data/vnexpressrss_rss_link.txt'):
             VNExpressRSS().load()
         self.log.info('Getting rss links')
         with open('data/vnexpressrss_rss_link.txt', 'r') as f:
@@ -61,7 +67,7 @@ class RssExtractor(BaseClass):
     def load(self):
         self.log.info("Saving link...")
         news_links = self.extract()
-        with open('data/vnexpressrss_news_link.txt', 'w+') as f:
+        with open('crawler/data/vnexpressrss_news_link.txt', 'w+') as f:
             for link in news_links:
                 f.writelines(link + '\n')
             self.log.info("Successfully saved.")
@@ -69,10 +75,10 @@ class RssExtractor(BaseClass):
 class NewsExtractor(BaseClass):
     def __init__(self):
         super().__init__()
-        if is_file_empty('data/vnexpressrss_news_link.txt'):
+        if is_file_empty('crawler/data/vnexpressrss_news_link.txt'):
             RssExtractor().load()
         self.log.info('Getting news links')
-        with open('data/vnexpressrss_news_link.txt', 'r') as f:
+        with open('crawler/data/vnexpressrss_news_link.txt', 'r') as f:
             self.link = [i[:-1] for i in f.readlines()]
             self.log.info('Successfully getting rss links')
 
@@ -80,15 +86,44 @@ class NewsExtractor(BaseClass):
         return self.link
 
     def extract_news(self, link):
-        pass
+        keys = ["source", "source_url", "title", "sapo", "body", "id", "publish", "keyswords", "cates"]
+        news_info = dict((el, "") for el in keys)
+        res = requests.get(link).text
+        soup = BeautifulSoup(res, 'lxml')
+        news_container = soup.find('div', attrs={'class': "sidebar-1"})
+        news_info["source"] = "vnexpress"
+        news_info["source_url"] = link
+        news_info["title"] = news_container.find('h1', attrs={"class": 'title-detail'}).text
+        news_info["sapo"] = news_container.find('p', attrs={"class": 'description'}).text
+        news_info["body"] = '\n '.join(i.text for i in news_container.findAll('p', attrs={"class": 'Normal'}))
+        news_info['id'] = hash(link)
+        tags_container = news_container.find('ul', attrs={"data-campaign": 'Header', "class": 'breadcrumb'})
+        tags_container = tags_container.findAll('li')
+        news_info['tags'] = [i.text for i in tags_container]
+        news_info['keywords'] = []
+        news_info['cates'] = []
+        return news_info
 
     def extract(self):
-        for i in self.link:
-            news = self.extract_news(i)
+        for i, link in enumerate(self.link):
+            try:
+                self.log.info(f"extracting: {link}")
+                news = self.extract_news(link)
+                self.log.info(f"Finished extracting {link}, pushing to database")
+                db.insert_one(news)
+                self.log.info("Pushed to database")
+            except BaseException as e:
+                self.log.error(f"Error: {e}")
+                continue
+            finally:
+                if i % 20 == 0:
+                    time.sleep(random.random())
 
 
 
 if __name__ == '__main__':
+    # url = 'https://vnexpress.net/ran-doc-chui-vao-ong-nuoc-de-ghep-doi-4380130.html'
     extractor = NewsExtractor()
-    print(extractor.debug())
+    from pprint import pprint
+    pprint(extractor.extract())
 

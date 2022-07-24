@@ -52,5 +52,5 @@ SCHEMA_NEWS = {
         "keywords",
         "cates"
     ],
-    "additionalProperties": False
+    "additionalProperties": True
 }
