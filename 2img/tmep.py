@@ -1,3 +1,5 @@
+import logging
+
 from base import BaseClass
 from common.database_connect import connect_to_database
 
@@ -14,10 +16,16 @@ from selenium.common.exceptions import TimeoutException
 from common.get_webdriver import get_selenium_chrome_webdriver_path
 from credentials.chrome_user_data import user_data_path  # create a folder name credentials and paste your Chrome
                                                         # user data path there
-
+def clone_database(db_name):
+    db_name = db_name.lower()
+    if db_name in db.list_collection_names():
+        db[db_name].drop()
+    db[db_name].insert_many(db['news'].find({}))
+    logging.info(f'Successfully cloned {db_name}')
 
 db = connect_to_database()
-db = db.news
+clone_database('temp')
+db = db.temp
 
 
 class Automation(BaseClass):
@@ -44,7 +52,8 @@ class Automation(BaseClass):
     def get_text(self):
         documents_count = db.count_documents({"source": "vnexpress"})
         for i in range(documents_count):
-            res = db.find()
+            res = db.find_one()
+            db.delete_one({"_id": res['_id']})
             yield res['title'], res['body']
 
 
@@ -53,7 +62,9 @@ if __name__ == '__main__':
         documents_count = db.count_documents({"source": "vnexpress"})
         for i in range(documents_count):
             res = db.find_one()
+            db.delete_one({"_id": res['_id']})
             yield res['title'], res['body']
+
 
     for title, body in test():
         print(f"{title=}, \n{body=}")

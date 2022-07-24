@@ -1,0 +1,1 @@
+user_data_path = "C:\\Users\\toduc\\AppData\\Local\\Google\\Chrome\\User Data"
