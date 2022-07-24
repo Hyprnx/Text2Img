@@ -1,7 +1,7 @@
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from base import BaseClass
-from schema import SCHEMA_NEWS
+from common.schema.schema import SCHEMA_NEWS
 
 
 class Validator(BaseClass):
