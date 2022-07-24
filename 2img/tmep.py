@@ -16,6 +16,9 @@ from credentials.chrome_user_data import user_data_path  # create a folder name 
                                                         # user data path there
 
 
+db = connect_to_database()
+db = db.news
+
 
 class Automation(BaseClass):
     def __init__(self, headless=False):
@@ -39,7 +42,18 @@ class Automation(BaseClass):
             self.driver.quit()
 
     def get_text(self):
+        documents_count = db.count_documents({"source": "vnexpress"})
+        for i in range(documents_count):
+            res = db.find()
+            yield res['title'], res['body']
 
 
 if __name__ == '__main__':
-    Automation()
+    def test():
+        documents_count = db.count_documents({"source": "vnexpress"})
+        for i in range(documents_count):
+            res = db.find_one()
+            yield res['title'], res['body']
+
+    for title, body in test():
+        print(f"{title=}, \n{body=}")
