@@ -57,15 +57,16 @@ class Automation(BaseClass):
             db.delete_one({"_id": res['_id']})
             yield res['title'], res['body']
 
+    def get_site(self):
+        self.log.info("Getting site...")
+        self.driver.get("https://docs.google.com")
+        WebDriverWait(self.driver, 10).until(EC.title_is('Đăng nhập - Tài khoản Google'))
+        self.driver.find_element(by=By.CSS_SELECTOR("#identifierId")).send_keys("toducanh2001@gmail.com")
+        self.log.info("Site loaded")
+
+
+    def run(self):
+        self.get_site()
 
 if __name__ == '__main__':
-    def test():
-        documents_count = db.count_documents({"source": "vnexpress"})
-        for i in range(documents_count):
-            res = db.find_one()
-            db.delete_one({"_id": res['_id']})
-            yield res['title'], res['body']
-
-
-    for title, body in test():
-        print(f"{title=}, \n{body=}")
+    Automation().run()
