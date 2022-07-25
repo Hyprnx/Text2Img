@@ -29,7 +29,10 @@ class AutomationGenerator(BaseClass):
         self.app.Document['File Tab'].click()
         self.app.Document['Save As'].select()
         self.app.Document['Browse'].click()
-        # self.app.Document['Browse'].click()
+        send_keys(f'{dev_default_id}.pdf')
+        self.app.Document['Save as type:ComboBox'].type_keys("%{DOWN}")
+        self.app.Document['Save as type:ComboBox'].select("PDF ")
+
         # self.app.Document['Address: Documents'].toggle()
         self.app.Document.print_control_identifiers()
 
