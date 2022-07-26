@@ -55,9 +55,11 @@ class AutomationGenerator(BaseClass):
         save_path = self.save_path.replace('\n', '{ENTER}').replace('\t', '{TAB}').replace(' ', '{VK_SPACE}')
         save_path = save_path + f'\\{_id}.pdf'
         send_keys(save_path)
-        self.app.Document['Save as type:ComboBox'].type_keys("%{DOWN}")
-        self.app.Document['Save as type:ComboBox'].select("PDF ")
-        send_keys("{ENTER}")
+        self.app.Document['Save as type:ComboBox'].click()
+        # self.app.Document['Save as type:ComboBox'].type_keys("%{DOWN}")
+        self.app.Document.print_control_identifiers()
+        # self.app.Document['Save as type:ComboBox'].select("pdf")
+        # send_keys("{ENTER}")
 
 
 if __name__ == '__main__':
