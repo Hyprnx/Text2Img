@@ -24,17 +24,8 @@ class AutomationGenerator(BaseClass):
         self._open_blank_document()
 
     def _experimental(self):
-        dev_default_id = '123456'
-        text = "hello world"
-        self.app.Document['File Tab'].click()
-        self.app.Document['Save As'].select()
-        self.app.Document['Browse'].click()
-        send_keys(f'{dev_default_id}.pdf')
-        self.app.Document['Save as type:ComboBox'].type_keys("%{DOWN}")
-        self.app.Document['Save as type:ComboBox'].select("PDF ")
+        pass
 
-        # self.app.Document['Address: Documents'].toggle()
-        self.app.Document.print_control_identifiers()
 
 
     def _open_blank_document(self):
@@ -52,14 +43,21 @@ class AutomationGenerator(BaseClass):
         self.app['Dialog']['Document'].type_keys(text)
         self.log.info("Document edited")
 
+
     def fetch_data(self):
         pass
 
-    def save_document(self, text):
+    def save_document(self, text='Hello World', _id='12345678'):
         self._edit_document(text)
-        self.log.info("Saving document")
-        self.app['Dialog']['Document'].type_keys('{ENTER}')
-        self.log.info("Document saved")
+        self.app.Document['File Tab'].click()
+        self.app.Document['Save As'].select()
+        self.app.Document['Browse'].click()
+        save_path = self.save_path.replace('\n', '{ENTER}').replace('\t', '{TAB}').replace(' ', '{VK_SPACE}')
+        save_path = save_path + f'\\{_id}.pdf'
+        send_keys(save_path)
+        self.app.Document['Save as type:ComboBox'].type_keys("%{DOWN}")
+        self.app.Document['Save as type:ComboBox'].select("PDF ")
+        send_keys("{ENTER}")
 
 
 if __name__ == '__main__':
@@ -78,4 +76,4 @@ if __name__ == '__main__':
            'sự; Ông Nguyễn Tiến Mạnh (SN 1970, tại Bắc Giang) - Phó Giám đốc Công ty cổ phần du lịch thương mại Lữ ' \
            'Hành Việt, Giám đốc Công ty vận tải du lịch Hoàng Long Luxury, bị khởi tố về tội "Đưa hối lộ" quy định ' \
            'tại Điều 364 Bộ luật Hình sự. '
-    AutomationGenerator()._experimental()
+    AutomationGenerator().save_document(text, _id='132456789')
